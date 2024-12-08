@@ -1,11 +1,10 @@
-import { NgFor } from "@angular/common";
+import { NgFor, CommonModule } from "@angular/common";
 import { Component, Input } from "@angular/core";
 import { Task } from "../types/Task";
 
 @Component({
-  selector: "app-tasks-list",
-  standalone: true,
-  imports: [NgFor],
+  selector: "TasksListComponent",
+  imports: [NgFor, CommonModule],
   template: `
     <ul>
       <li *ngFor="let task of tasks">
