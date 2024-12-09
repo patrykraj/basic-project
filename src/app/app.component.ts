@@ -6,9 +6,9 @@ import { TaskListPageComponent } from "./pages/task-list.page.component";
   standalone: true,
   imports: [TaskListPageComponent],
   template: `
-    <h1 class="text-orange-500 bg-black text-center py-4">{{ title }}</h1>
+    <h1 class="text-orange-500 uppercase py-4 text-2xl text-center">{{ title }}</h1>
 
-    <main>
+    <main class="grid place-items-center pt-4">
       <TaskListPageComponent />
     </main>
   `,

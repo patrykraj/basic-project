@@ -4,7 +4,7 @@ import { Component, EventEmitter, Output } from "@angular/core";
   selector: "TaskInputComponent",
   imports: [],
   template: `
-    <div>
+    <div class="mb-8">
       <input
         #textInput
         type="text"
@@ -14,6 +14,7 @@ import { Component, EventEmitter, Output } from "@angular/core";
       <button
         type="submit"
         (click)="submitText.emit(textInput.value); textInput.value = ''"
+        class="ml-5 border-orange-400 border border-spacing-x-5"
       >
         Add
       </button>

@@ -28,6 +28,8 @@
     "@angular/cli": "^19.0.4",
     "@angular/compiler-cli": "^19.0.0",
     "@eslint/js": "^9.16.0",
+    "@ng-icons/core": "^29.10.0",
+    "@ng-icons/feather-icons": "^29.10.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.16.0",
     "globals": "^15.13.0",
