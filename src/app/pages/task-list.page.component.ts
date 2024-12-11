@@ -32,7 +32,9 @@ type ComponentListState = IdleState | LoadingState | SuccessState | ErrorState;
   standalone: true,
   imports: [TasksListComponent, TaskInputComponent, NgIf],
   template: `
-    <TaskInputComponent (submitText)="addTask($event)" />
+    <TaskInputComponent
+      (submitText)="listStatus.state === 'success' && addTask($event, listStatus.results)"
+    />
     <TasksListComponent
       *ngIf="listStatus.state === 'success'; else loadingTemplate"
       [tasks]="listStatus.results"
@@ -51,7 +53,7 @@ export class TaskListPageComponent implements OnInit {
   private readonly URL: string = "http://localhost:3000";
 
   ngDoCheck(): void {
-    console.log("ngDoCheck called. Current value:", this.listStatus);
+    // console.log("ngDoCheck called. Current value:", this.listStatus);
   }
 
   ngOnInit(): void {
@@ -81,11 +83,34 @@ export class TaskListPageComponent implements OnInit {
     }
   }
 
-  addTask(newTaskDescription: string) {
-    // this.listStatus?.results?.push({
-    //   description: newTaskDescription,
-    //   done: false,
-    //   id: Number(Math.random()),
-    // });
+  addTask(description: string, tasks: Task[]) {
+    return fetch(`${this.URL}/tasks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        createdDate: new Date().getUTCDate(),
+        description: description,
+        done: false,
+      } as unknown as Task),
+    })
+      .then<Task | Error>((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+
+        return new Error("Nie można dodać zadania");
+      })
+      .then((res) => {
+        if ("id" in res) {
+          this.listStatus = {
+            state: "success",
+            results: [...tasks, res],
+          };
+        } else {
+          alert(res.message);
+        }
+      });
   }
 }
