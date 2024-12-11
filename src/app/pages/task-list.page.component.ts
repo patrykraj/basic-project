@@ -93,7 +93,7 @@ export class TaskListPageComponent implements OnInit {
         createdDate: new Date().getUTCDate(),
         description: description,
         done: false,
-      } as unknown as Task),
+      } as Omit<Task, "id">),
     })
       .then<Task | Error>((response) => {
         if (response.ok) {
