@@ -3,29 +3,8 @@ import { TasksListComponent } from "../components/tasks-list.component";
 import { TaskInputComponent } from "../components/task-input.component";
 import { Task } from "../types/Task";
 import { NgIf } from "@angular/common";
-
-type ListFetchingError = { status: number; message: string };
-
-// idle - initial
-type IdleState = {
-  state: "idle";
-};
-// loading
-type LoadingState = {
-  state: "loading";
-};
-// success
-type SuccessState = {
-  state: "success";
-  results: Task[];
-};
-// error
-type ErrorState = {
-  state: "error";
-  error: ListFetchingError;
-};
-
-type ComponentListState = IdleState | LoadingState | SuccessState | ErrorState;
+import { taskServices } from "../services/tasks.service";
+import { ComponentListState } from "../types/ListStatusTypes";
 
 @Component({
   selector: "TaskListPageComponent",
@@ -50,11 +29,9 @@ type ComponentListState = IdleState | LoadingState | SuccessState | ErrorState;
 export class TaskListPageComponent implements OnInit {
   listStatus: ComponentListState = { state: "idle" };
 
-  private readonly URL: string = "http://localhost:3000";
-
-  ngDoCheck(): void {
-    // console.log("ngDoCheck called. Current value:", this.listStatus);
-  }
+  // ngDoCheck(): void {
+  //   console.log("ngDoCheck called. Current value:", this.listStatus);
+  // }
 
   ngOnInit(): void {
     this.fetchData();
@@ -62,55 +39,26 @@ export class TaskListPageComponent implements OnInit {
 
   async fetchData(): Promise<void> {
     this.listStatus = { state: "loading" };
-    try {
-      const response = await fetch(`${this.URL}/tasks`);
 
-      if (!response.ok) {
-        throw new Error("Nie udało się pobrać danych");
-      }
+    const response = await taskServices.fetchTasks();
 
-      const data: Task[] = await response.json();
-      this.listStatus = { state: "success", results: data };
-    } catch (error) {
-      this.listStatus = {
-        state: "error",
-        error:
-          error instanceof Error
-            ? { status: 404, message: error.message }
-            : { status: 404, message: "Wystąpił nieoczekiwany błąd" },
-      };
-      console.error("Error fetching data:", error);
+    if (Array.isArray(response)) {
+      this.listStatus = { state: "success", results: response };
+    } else {
+      this.listStatus = { state: "error", error: response };
     }
   }
 
-  addTask(description: string, tasks: Task[]) {
-    return fetch(`${this.URL}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        createdDate: new Date().getUTCDate(),
-        description: description,
-        done: false,
-      } as Omit<Task, "id">),
-    })
-      .then<Task | Error>((response) => {
-        if (response.ok) {
-          return response.json();
-        }
-
-        return new Error("Nie można dodać zadania");
-      })
-      .then((res) => {
-        if ("id" in res) {
-          this.listStatus = {
-            state: "success",
-            results: [...tasks, res],
-          };
-        } else {
-          alert(res.message);
-        }
-      });
+  async addTask(description: string, tasks: Task[]) {
+    taskServices.addTask(description).then((res) => {
+      if ("id" in res) {
+        this.listStatus = {
+          state: "success",
+          results: [...tasks, res],
+        };
+      } else {
+        alert(res.message);
+      }
+    });
   }
 }
