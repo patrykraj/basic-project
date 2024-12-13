@@ -1,10 +1,11 @@
 import { NgFor, CommonModule, NgIf } from "@angular/common";
-import { Component, Input } from "@angular/core";
+import { Component, inject, Input } from "@angular/core";
 import { Task } from "../types/Task";
 import { TaskRemoveButtonComponent } from "./task-remove-button.component";
 import { NgIconComponent, provideIcons } from "@ng-icons/core";
 import { featherCalendar } from "@ng-icons/feather-icons";
 import { TaskEditFieldComponent } from "./task-edit-field.component";
+import TaskService from "../services/tasks.service";
 
 @Component({
   selector: "TasksListComponent",
@@ -34,12 +35,13 @@ import { TaskEditFieldComponent } from "./task-edit-field.component";
               *ngIf="isEditMode == task.id; else previewModeTemplate"
               [value]="task.description"
               (keyup.escape)="isEditMode = null"
+              (submitUpdate)="handleUpdateTask($event, task.id)"
             />
             <ng-template class="text-left" #previewModeTemplate>
               {{ task.description }}
             </ng-template>
             <footer class="flex justify-end">
-              <TaskRemoveButtonComponent />
+              <TaskRemoveButtonComponent (deleteTask)="handleDeleteTask(task.id)" />
             </footer>
           </button>
         </div>
@@ -52,8 +54,21 @@ export class TasksListComponent {
   @Input() tasks: Task[] = [];
 
   isEditMode: number | null = null;
-
   isSingleClick = true;
+
+  private TaskService = inject(TaskService);
+
+  handleDeleteTask(id: number) {
+    this.TaskService.delete(id).then((res) => {
+      console.log(res, "RESPONS Z DILITA");
+    });
+  }
+
+  handleUpdateTask(description: string, id: number) {
+    this.TaskService.update(id, description).then((res) => {
+      console.log(res, "RESPONS Z APDEJTA");
+    });
+  }
 
   handleSingleClick(task: Task) {
     this.isSingleClick = true;

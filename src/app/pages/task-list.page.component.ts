@@ -1,9 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
 import { TasksListComponent } from "../components/tasks-list.component";
 import { TaskInputComponent } from "../components/task-input.component";
 import { Task } from "../types/Task";
 import { NgIf } from "@angular/common";
-import { taskServices } from "../services/tasks.service";
+import TaskService from "../services/tasks.service";
 import { ComponentListState } from "../types/ListStatusTypes";
 
 @Component({
@@ -18,7 +18,6 @@ import { ComponentListState } from "../types/ListStatusTypes";
       *ngIf="listStatus.state === 'success'; else loadingTemplate"
       [tasks]="listStatus.results"
     />
-
     <p *ngIf="listStatus.state === 'error'">{{ listStatus.error.message }}</p>
     <ng-template #loadingTemplate>
       <p *ngIf="listStatus.state === 'loading'">Loading...</p>
@@ -28,6 +27,8 @@ import { ComponentListState } from "../types/ListStatusTypes";
 })
 export class TaskListPageComponent implements OnInit {
   listStatus: ComponentListState = { state: "idle" };
+
+  private TaskService = inject(TaskService);
 
   // ngDoCheck(): void {
   //   console.log("ngDoCheck called. Current value:", this.listStatus);
@@ -40,7 +41,7 @@ export class TaskListPageComponent implements OnInit {
   async fetchData(): Promise<void> {
     this.listStatus = { state: "loading" };
 
-    const response = await taskServices.fetchTasks();
+    const response = await this.TaskService.getAll();
 
     if (Array.isArray(response)) {
       this.listStatus = { state: "success", results: response };
@@ -50,7 +51,7 @@ export class TaskListPageComponent implements OnInit {
   }
 
   async addTask(description: string, tasks: Task[]) {
-    taskServices.addTask(description).then((res) => {
+    this.TaskService.add(description).then((res) => {
       if ("id" in res) {
         this.listStatus = {
           state: "success",

@@ -1,5 +1,4 @@
-import { NgIf } from "@angular/common";
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { NgIconComponent, provideIcons } from "@ng-icons/core";
 import {
   featherTrash2,
@@ -23,7 +22,11 @@ import {
       >
         <span>Are you sure?</span>
         <button>
-          <ng-icon name="featherCheck" class="icon--hover" />
+          <ng-icon
+            (click)="deleteTask.emit(taskId)"
+            name="featherCheck"
+            class="icon--hover"
+          />
         </button>
         <button (click)="setDeleteMode(); $event.stopPropagation()">
           <ng-icon name="featherX" class="icon--hover" />
@@ -37,6 +40,8 @@ import {
   styles: ``,
 })
 export class TaskRemoveButtonComponent {
+  @Input() taskId!: number;
+  @Output() deleteTask = new EventEmitter<number>();
   deleteMode: boolean = false;
 
   setDeleteMode() {
